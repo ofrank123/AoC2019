@@ -4,7 +4,7 @@ I'll try to keep the below chart updated with what I've completed.
 | Day | Prob 1 | Prob 2 |
 |   1 | ✔      | ✔      |
 |   2 | ✔      | ✔      |
-|   3 | ✔      | ✗      |
+|   3 | ✔      | ✔      |
 |   4 |        |        |
 |   5 |        |        |
 |   6 |        |        |
