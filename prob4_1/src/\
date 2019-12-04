@@ -1,0 +1,19 @@
+fn main() {
+    let input_start = 271973;
+    let input_end = 785961;
+}
+
+fn is_valid(code: i32) -> bool {
+    let has_double = false;
+    let last_val = 10;
+    while code > 0 {
+        let dig = code % 10;
+        if dig == last_val {
+            has_double = true;
+        }
+        else if dig > last_val {
+            return false;
+        }
+    }
+    has_double;
+}
