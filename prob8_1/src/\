@@ -1,0 +1,20 @@
+use std::fs;
+
+const W: i32 = 25;
+const H: i32 = 6;
+
+type Layer = Vec<Vec<i32>>;
+
+fn main() {
+    let layer_size = W * H;
+
+    let input = fs::read_to_string("./input")
+        .expect("Could not read file");
+    let input: Vec<char> = input.chars().collect();
+    let input: Vec<i32> = input.iter().map(|d| *d as i32 - '0' as i32).collect();
+
+    let layers: Vec<Layer> = vec![];
+
+    for (i, input) in input.iter().enumerate() {
+    }
+}
