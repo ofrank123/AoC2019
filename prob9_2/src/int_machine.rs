@@ -1,14 +1,16 @@
+use std::collections::BTreeMap;
+
 pub struct IntMachine {
     eip: usize,
     rbp: usize,
     out: Vec<i64>,
     input: Vec<i64>,
-    ins: Vec<i64>,
+    ins: BTreeMap<usize, i64>,
     op: Op,
 }
 
 impl IntMachine {
-    pub fn new(input: Vec<i64>, ins: Vec<i64>) -> IntMachine {
+    pub fn new(input: Vec<i64>, ins: BTreeMap<usize, i64>) -> IntMachine {
         IntMachine {
             eip: 0,
             rbp: 0,
@@ -22,6 +24,13 @@ impl IntMachine {
         }
     }
 
+    pub fn get(&self, i: usize) -> i64 {
+        match self.ins.get(&i) {
+            Some(val) => *val,
+            None => 0
+        }
+    }
+
     pub fn run(&mut self) -> Vec<i64> {
         while run_machine(self) {}
 
@@ -30,7 +39,7 @@ impl IntMachine {
 }
 
 pub fn run_machine(m: &mut IntMachine) -> bool {
-    while m.ins[m.eip as usize] != 99 {
+    while *m.ins.get(&(m.eip as usize)).unwrap() != 99 {
         parse_op(m);
         handle_op(m);
         if m.out.len() > 0 {
@@ -94,7 +103,7 @@ fn handle_op(m: &mut IntMachine) {
 }
 
 fn parse_op(m: &mut IntMachine) {
-    let mut op_code = m.ins[m.eip];
+    let mut op_code = m.get(m.eip);
     let reg_count: usize;
     let op_type = match op_code % 100 {
         1=>{
@@ -142,29 +151,10 @@ fn parse_op(m: &mut IntMachine) {
 
     op_code /= 100;
     for i in 0..reg_count {
-        //raw.push(m.ins[m.eip + i + 1]);
         match op_code % 10 {
-            0 => {
-                let p = m.ins[m.eip + i + 1] as usize;
-                // init mem with 0s if pointer is accessing outside of current mem
-                if p >= m.ins.len() {
-                    for _ in (m.ins.len() - 1)..p {
-                        m.ins.push(0);
-                    }
-                }
-                parsed.push(p);
-            },
+            0 => {parsed.push(m.get(m.eip + i + 1) as usize);},
             1 => {parsed.push(m.eip + i + 1);},
-            2 => {
-                let p = (m.rbp as i64 + m.ins[m.eip + i + 1]) as usize;
-                // init mem with 0s if pointer is accessing outside of current mem
-                if p >= m.ins.len() {
-                    for _ in (m.ins.len() - 1)..p {
-                        m.ins.push(0);
-                    }
-                }
-                parsed.push(p);
-            }
+            2 => {parsed.push((m.rbp as i64 + m.get(m.eip + i + 1)) as usize);}
             _ => {panic!("Not a supported parameter mode");}
         }
         op_code /= 10;
@@ -177,36 +167,35 @@ fn parse_op(m: &mut IntMachine) {
 }
 
 fn op_add(m: &mut IntMachine) {
-    let val1 = m.ins[m.op.parsed[0]];
-    let val2 = m.ins[m.op.parsed[1]];
-    m.ins[m.op.parsed[2] as usize] = val1 + val2;
-
+    let val1 = m.get(m.op.parsed[0]);
+    let val2 = m.get(m.op.parsed[1]);
+    m.ins.insert(m.op.parsed[2], val1 + val2);
     m.eip += 4;
 }
 
 fn op_mul(m: &mut IntMachine) {
-    let val1 = m.ins[m.op.parsed[0]];
-    let val2 = m.ins[m.op.parsed[1]];
-    m.ins[m.op.parsed[2] as usize] = val1 * val2;
+    let val1 = m.get(m.op.parsed[0]);
+    let val2 = m.get(m.op.parsed[1]);
+    m.ins.insert(m.op.parsed[2], val1 * val2);
 
     m.eip += 4
 }
 
 fn op_in(m: &mut IntMachine) {
     let num = m.input.pop();
-    m.ins[m.op.parsed[0]] = num.unwrap();
+    m.ins.insert(m.op.parsed[0], num.unwrap());
 
     m.eip += 2;
 }
 
 fn op_out(m: &mut IntMachine) {
-    m.out.push(m.ins[m.op.parsed[0] as usize]);
+    m.out.push(m.get(m.op.parsed[0]));
     m.eip += 2;
 }
 
 fn op_jnz(m: &mut IntMachine) {
-    let val1 = m.ins[m.op.parsed[0]];
-    let val2 = m.ins[m.op.parsed[1]];
+    let val1 = m.get(m.op.parsed[0]);
+    let val2 = m.get(m.op.parsed[1]);
     if val1 != 0 {
         m.eip = val2 as usize;
     } else {
@@ -215,8 +204,8 @@ fn op_jnz(m: &mut IntMachine) {
 }
 
 fn op_jz(m: &mut IntMachine) {
-    let val1 = m.ins[m.op.parsed[0]];
-    let val2 = m.ins[m.op.parsed[1]];
+    let val1 = m.get(m.op.parsed[0]);
+    let val2 = m.get(m.op.parsed[1]);
     if val1 == 0 {
         m.eip = val2 as usize;
     } else {
@@ -225,33 +214,33 @@ fn op_jz(m: &mut IntMachine) {
 }
 
 fn op_lt(m: &mut IntMachine) {
-    let val1 = m.ins[m.op.parsed[0]];
-    let val2 = m.ins[m.op.parsed[1]];
-    m.ins[m.op.parsed[2] as usize] = if val1 < val2 {
+    let val1 = m.get(m.op.parsed[0]);
+    let val2 = m.get(m.op.parsed[1]);
+    m.ins.insert(m.op.parsed[2], if val1 < val2 {
         1
     } else {
         0
-    };
+    });
 
     m.eip += 4;
 }
 
 fn op_eq(m: &mut IntMachine) {
-    let val1 = m.ins[m.op.parsed[0]];
-    let val2 = m.ins[m.op.parsed[1]];
-    m.ins[m.op.parsed[2] as usize] = if val1 == val2 {
+    let val1 = m.get(m.op.parsed[0]);
+    let val2 = m.get(m.op.parsed[1]);
+    m.ins.insert(m.op.parsed[2], if val1 == val2 {
         1
     } else {
         0
-    };
+    });
 
     m.eip += 4;
 }
 
 
 fn op_rbp(m: &mut IntMachine) {
-    let val1 = m.ins[m.op.parsed[0]];
-    m.rbp = (m.rbp as i64 + val1) as usize;
+    let val = m.get(m.op.parsed[0]);
+    m.rbp = (m.rbp as i64 + val) as usize;
 
     m.eip += 2;
 }
