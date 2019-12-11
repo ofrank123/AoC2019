@@ -12,7 +12,7 @@ I'll try to keep the below chart updated with what I've completed.
 |   8 | ✔      | ✔      |
 |   9 | ✔      | ✔      |
 |  10 | ✔      | ✔      |
-|  11 | ✗      | ✗      |
+|  11 | ✔      | ✔      |
 |  12 | ✗      | ✗      |
 |  13 | ✗      | ✗      |
 |  14 | ✗      | ✗      |
