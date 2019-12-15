@@ -16,7 +16,7 @@ I'll try to keep the below chart updated with what I've completed.
 |  12 | ✔      | ✔      |
 |  13 | ✔      | ✔      |
 |  14 | ✔      | ✔      |
-|  15 | ✗      | ✗      |
+|  15 | ✔      | ✔      |
 |  16 | ✗      | ✗      |
 |  17 | ✗      | ✗      |
 |  18 | ✗      | ✗      |
